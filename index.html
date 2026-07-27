@@ -5,19 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>📍 موقعي الحالي</title>
     
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, sans-serif;
-            background: #0f0f23;
+            background: #0a0a1a;
             color: #fff;
             overflow: hidden;
             height: 100vh;
@@ -33,16 +28,16 @@
         /* البطاقة العلوية */
         .info-card {
             position: fixed;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            background: rgba(15, 15, 35, 0.95);
-            backdrop-filter: blur(15px);
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            background: rgba(10, 10, 26, 0.95);
+            backdrop-filter: blur(20px);
             border-radius: 20px;
-            padding: 15px;
+            padding: 16px;
             z-index: 1000;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
             max-width: 500px;
             margin: 0 auto;
         }
@@ -50,20 +45,16 @@
         .info-card h2 {
             font-size: 16px;
             color: #00d4ff;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .info-card h2::before {
-            content: "📍";
-        }
-
         .address {
             font-size: 14px;
             line-height: 1.6;
-            color: #e0e0e0;
+            color: #e8e8e8;
             min-height: 40px;
         }
 
@@ -74,94 +65,101 @@
 
         .coords {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             margin-top: 10px;
             font-size: 12px;
-            color: #aaa;
+            flex-wrap: wrap;
         }
 
         .coord-box {
-            background: rgba(255,255,255,0.05);
-            padding: 5px 12px;
-            border-radius: 10px;
+            background: rgba(0, 212, 255, 0.08);
+            padding: 6px 12px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             gap: 5px;
+            border: 1px solid rgba(0, 212, 255, 0.1);
         }
 
         .coord-box span {
             color: #00ff88;
             font-weight: bold;
+            font-family: monospace;
         }
 
-        /* زر التتبع */
-        .track-btn {
+        /* شريط الحالة */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ffaa00;
+            box-shadow: 0 0 8px rgba(255, 170, 0, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.accurate {
+            background: #00ff88;
+            box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+
+        /* زر الدقة العالية */
+        .accuracy-btn {
             position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
-            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            background: linear-gradient(135deg, #00d4ff, #0066aa);
             border: none;
             color: #fff;
-            padding: 14px 35px;
+            padding: 14px 30px;
             border-radius: 30px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 5px 25px rgba(0, 212, 255, 0.4);
+            box-shadow: 0 5px 25px rgba(0, 212, 255, 0.3);
             transition: all 0.3s;
             display: flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
         }
 
-        .track-btn:active {
+        .accuracy-btn:active {
             transform: translateX(-50%) scale(0.95);
         }
 
-        .track-btn.tracking {
-            background: linear-gradient(135deg, #ff4757, #cc0033);
-            box-shadow: 0 5px 25px rgba(255, 71, 87, 0.4);
-        }
-
-        /* مؤشر GPS */
-        .gps-status {
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 1001;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #ff4757;
-            border: 2px solid #fff;
-            box-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
-        }
-
-        .gps-status.active {
-            background: #00ff88;
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.3); opacity: 0.7; }
+        .accuracy-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         /* شاشة التحميل */
         .splash {
             position: fixed;
             inset: 0;
-            background: #0f0f23;
+            background: #0a0a1a;
             z-index: 9999;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 20px;
-            transition: opacity 0.5s;
+            transition: opacity 0.6s;
         }
 
         .splash.hidden {
@@ -172,7 +170,7 @@
         .splash-spinner {
             width: 60px;
             height: 60px;
-            border: 4px solid rgba(0, 212, 255, 0.2);
+            border: 4px solid rgba(0, 212, 255, 0.15);
             border-top-color: #00d4ff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -209,7 +207,7 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        /* تخصيص Leaflet */
+        /* Leaflet custom */
         .leaflet-control-zoom {
             border-radius: 15px !important;
             overflow: hidden;
@@ -217,9 +215,9 @@
         }
 
         .leaflet-control-zoom a {
-            background: rgba(15, 15, 35, 0.9) !important;
+            background: rgba(10, 10, 26, 0.9) !important;
             color: #fff !important;
-            border-color: rgba(255,255,255,0.1) !important;
+            border-color: rgba(0,212,255,0.2) !important;
             width: 40px !important;
             height: 40px !important;
             line-height: 40px !important;
@@ -227,14 +225,14 @@
         }
 
         .leaflet-popup-content-wrapper {
-            background: rgba(15, 15, 35, 0.95);
+            background: rgba(10, 10, 26, 0.95);
             color: #fff;
             border-radius: 15px;
             backdrop-filter: blur(10px);
         }
 
         .leaflet-popup-tip {
-            background: rgba(15, 15, 35, 0.95);
+            background: rgba(10, 10, 26, 0.95);
         }
     </style>
 </head>
@@ -243,48 +241,49 @@
     <!-- شاشة التحميل -->
     <div class="splash" id="splash">
         <div class="splash-spinner"></div>
-        <p>جاري تحديد موقعك...</p>
+        <p>جاري تحديد موقعك من IP...</p>
     </div>
-
-    <!-- مؤشر GPS -->
-    <div class="gps-status" id="gpsStatus"></div>
 
     <!-- البطاقة العلوية -->
     <div class="info-card">
-        <h2>موقعك الحالي</h2>
+        <h2>📍 موقعك الحالي</h2>
         <div class="address loading" id="address">جاري تحديد العنوان...</div>
         <div class="coords">
             <div class="coord-box">🌍 خط العرض: <span id="lat">--</span></div>
             <div class="coord-box">🌍 خط الطول: <span id="lng">--</span></div>
+        </div>
+        <div class="status-bar">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">موقع تقريبي من IP</span>
         </div>
     </div>
 
     <!-- الخريطة -->
     <div id="map"></div>
 
-    <!-- زر التتبع -->
-    <button class="track-btn" id="trackBtn" onclick="toggleTracking()">
-        🎯 تتبع موقعي
+    <!-- زر الدقة العالية -->
+    <button class="accuracy-btn" id="accBtn" onclick="getAccurateLocation()">
+        🎯 دقة أعلى (GPS)
     </button>
 
     <!-- رسالة خطأ -->
     <div class="error-toast" id="errorToast"></div>
 
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // ========== الإعدادات ==========
-        let map, marker, circle, watchId = null;
-        let isTracking = false;
-        let currentPos = null;
+        // ========== المتغيرات ==========
+        let map, marker, circle;
+        let currentLat = null, currentLng = null;
+        let isAccurate = false;
 
         const splash = document.getElementById('splash');
         const addressEl = document.getElementById('address');
         const latEl = document.getElementById('lat');
         const lngEl = document.getElementById('lng');
-        const gpsStatus = document.getElementById('gpsStatus');
-        const trackBtn = document.getElementById('trackBtn');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const accBtn = document.getElementById('accBtn');
         const errorToast = document.getElementById('errorToast');
 
         // ========== تهيئة الخريطة ==========
@@ -292,50 +291,47 @@
             map = L.map('map', {
                 zoomControl: false,
                 attributionControl: false
-            }).setView([lat, lng], 18);
+            }).setView([lat, lng], 15);
 
-            // طبقة الخريطة الداكنة الجميلة
+            // خريطة داكنة جميلة
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 maxZoom: 22,
                 subdomains: 'abcd'
             }).addTo(map);
 
-            // زوم في مكان مناسب
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-            // أيقونة مخصصة للموقع
+            // ماركر مخصص
             const locationIcon = L.divIcon({
                 className: 'custom-marker',
                 html: `<div style="
-                    width:24px;height:24px;
+                    width:22px;height:22px;
                     background:#00d4ff;
                     border:3px solid #fff;
                     border-radius:50%;
-                    box-shadow:0 0 15px rgba(0,212,255,0.6), 0 0 30px rgba(0,212,255,0.3);
-                    animation:bounce 1.5s infinite;
+                    box-shadow:0 0 15px rgba(0,212,255,0.6), 0 0 30px rgba(0,212,255,0.2);
                 "></div>`,
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
+                iconSize: [22, 22],
+                iconAnchor: [11, 11]
             });
 
             marker = L.marker([lat, lng], { icon: locationIcon }).addTo(map);
             
-            // دائرة الدقة
             circle = L.circle([lat, lng], {
-                radius: accuracy || 20,
+                radius: accuracy || 5000,
                 color: '#00d4ff',
                 fillColor: '#00d4ff',
-                fillOpacity: 0.15,
-                weight: 1
+                fillOpacity: 0.12,
+                weight: 1.5
             }).addTo(map);
 
-            // إخفاء شاشة التحميل
-            setTimeout(() => splash.classList.add('hidden'), 500);
+            setTimeout(() => splash.classList.add('hidden'), 600);
         }
 
         // ========== تحديث الموقع ==========
-        function updatePosition(lat, lng, accuracy) {
-            currentPos = { lat, lng };
+        function updatePosition(lat, lng, accuracy, accurate) {
+            currentLat = lat;
+            currentLng = lng;
             
             latEl.textContent = lat.toFixed(6);
             lngEl.textContent = lng.toFixed(6);
@@ -343,27 +339,36 @@
             if (marker) {
                 marker.setLatLng([lat, lng]);
                 circle.setLatLng([lat, lng]);
-                circle.setRadius(accuracy || 20);
+                circle.setRadius(accuracy || 5000);
             }
 
-            if (isTracking && map) {
-                map.panTo([lat, lng], { animate: true, duration: 0.5 });
+            if (map) {
+                map.flyTo([lat, lng], accurate ? 18 : 14, { duration: 1.5 });
             }
 
-            // جلب العنوان
+            // تحديث الحالة
+            if (accurate) {
+                isAccurate = true;
+                statusDot.classList.add('accurate');
+                statusText.textContent = "موقع دقيق (GPS)";
+                accBtn.innerHTML = "✅ دقة عالية مفعلة";
+                accBtn.disabled = true;
+            }
+
             fetchAddress(lat, lng);
         }
 
-        // ========== جلب العنوان (Reverse Geocoding) ==========
+        // ========== جلب العنوان ==========
         async function fetchAddress(lat, lng) {
             try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ar`);
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ar`, {
+                    headers: { 'User-Agent': 'MyLocationApp/1.0' }
+                });
                 const data = await res.json();
                 
                 if (data.display_name) {
-                    // تنظيف العنوان
                     const parts = data.display_name.split(', ');
-                    const cleanAddress = parts.slice(0, 4).join('، ');
+                    const cleanAddress = parts.slice(0, 5).join('، ');
                     addressEl.textContent = cleanAddress;
                     addressEl.classList.remove('loading');
                 }
@@ -372,71 +377,70 @@
             }
         }
 
-        // ========== تتبع الموقع ==========
-        function startTracking() {
+        // ========== الموقع من IP (بدون إذن!) ==========
+        async function getLocationFromIP() {
+            try {
+                // API مجاني - بيجيب الموقع من IP بدون أي إذن
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+
+                if (data.latitude && data.longitude) {
+                    const lat = data.latitude;
+                    const lng = data.longitude;
+                    
+                    initMap(lat, lng, 5000);
+                    updatePosition(lat, lng, 5000, false);
+                    
+                    // تحديث نص الحالة
+                    statusText.textContent = `موقع تقريبي - ${data.city || ''}, ${data.country_name || ''}`;
+                } else {
+                    throw new Error('No location data');
+                }
+            } catch (err) {
+                // لو فشل، نستخدم fallback
+                fallbackLocation();
+            }
+        }
+
+        // ========== Fallback (موقع افتراضي) ==========
+        function fallbackLocation() {
+            // القاهرة كموقع افتراضي
+            const lat = 30.0444;
+            const lng = 31.2357;
+            initMap(lat, lng, 10000);
+            updatePosition(lat, lng, 10000, false);
+            statusText.textContent = "موقع افتراضي (القاهرة)";
+            showError("تعذر تحديد الموقع تلقائيًا");
+        }
+
+        // ========== الدقة العالية (بيطلب إذن بس بزر) ==========
+        function getAccurateLocation() {
             if (!navigator.geolocation) {
-                showError("متصفحك لا يدعم تحديد الموقع");
+                showError("متصفحك لا يدعم GPS");
                 return;
             }
 
-            gpsStatus.classList.add('active');
+            accBtn.innerHTML = "⏳ جاري التحميل...";
+            accBtn.disabled = true;
 
-            // أول موقع
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
                     const { latitude, longitude, accuracy } = pos.coords;
-                    
-                    if (!map) {
-                        initMap(latitude, longitude, accuracy);
-                    }
-                    updatePosition(latitude, longitude, accuracy);
+                    updatePosition(latitude, longitude, accuracy, true);
                 },
-                (err) => handleError(err),
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-
-            // التتبع المستمر
-            watchId = navigator.geolocation.watchPosition(
-                (pos) => {
-                    const { latitude, longitude, accuracy } = pos.coords;
-                    if (!map) {
-                        initMap(latitude, longitude, accuracy);
-                    }
-                    updatePosition(latitude, longitude, accuracy);
+                (err) => {
+                    accBtn.innerHTML = "🎯 دقة أعلى (GPS)";
+                    accBtn.disabled = false;
+                    let msg = "❌ رفضت الإذن";
+                    if (err.code === 2) msg = "❌ تعذر تحديد الموقع";
+                    if (err.code === 3) msg = "⏱️ انتهى الوقت";
+                    showError(msg);
                 },
-                (err) => handleError(err),
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
             );
-        }
-
-        // ========== زر التتبع ==========
-        function toggleTracking() {
-            isTracking = !isTracking;
-            
-            if (isTracking) {
-                trackBtn.classList.add('tracking');
-                trackBtn.innerHTML = '⏹️ إيقاف التتبع';
-                if (currentPos) {
-                    map.flyTo([currentPos.lat, currentPos.lng], 18, { duration: 1 });
-                }
-            } else {
-                trackBtn.classList.remove('tracking');
-                trackBtn.innerHTML = '🎯 تتبع موقعي';
-            }
         }
 
         // ========== أخطاء ==========
-        function handleError(err) {
-            let msg = "حدث خطأ في تحديد الموقع";
-            switch(err.code) {
-                case 1: msg = "❌ رفضت إذن الوصول للموقع"; break;
-                case 2: msg = "❌ تعذر تحديد الموقع"; break;
-                case 3: msg = "⏱️ انتهى الوقت"; break;
-            }
-            showError(msg);
-            splash.classList.add('hidden');
-        }
-
         function showError(msg) {
             errorToast.textContent = msg;
             errorToast.classList.add('show');
@@ -444,17 +448,7 @@
         }
 
         // ========== تشغيل ==========
-        window.onload = startTracking;
-
-        // CSS animation للماركر
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes bounce {
-                0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.2); }
-            }
-        `;
-        document.head.appendChild(style);
+        window.onload = getLocationFromIP;
     </script>
 </body>
 </html>
